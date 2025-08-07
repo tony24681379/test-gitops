@@ -38,7 +38,7 @@ spec:
       {{- if $.Values.serviceAccount.enabled }}
       serviceAccount: {{ $.Values.name }}
       serviceAccountName: {{ $.Values.name }}
-      {{ end }}
+      {{- end }}
       {{- if or $values.nodeSelector .capacityType }}
       nodeSelector:
         {{- if $values.nodeSelector }}
