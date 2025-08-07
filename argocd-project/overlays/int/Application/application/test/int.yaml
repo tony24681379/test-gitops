@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    notifications.argoproj.io/subscribe.slack: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: test
+  project: xzeta
+  source:
+    repoURL: https://github.com/tony24681379/test-gitops.git
+    path: application/helm-charts/backend
+    targetRevision: main
+    plugin:
+      name: helm-ssm-v1.0
+      parameters:
+      - name: helm-ssm-values-files
+        array:
+        - test/values.int.yaml
+  syncPolicy:
+    syncOptions:
+    - ApplyOutOfSyncOnly=true
+    - CreateNamespace=true

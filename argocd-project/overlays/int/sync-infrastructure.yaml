@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sync-infrastructure
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  project: infrastructure
+  source:
+    path: argocd-project/overlays/int/Application/infrastructure
+    repoURL: https://github.com/tony24681379/test-gitops.git
+    targetRevision: main
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true

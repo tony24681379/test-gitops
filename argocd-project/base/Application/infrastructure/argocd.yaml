@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  annotations:
+    notifications.argoproj.io/subscribe.slack: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  project: infrastructure
+  source:
+    path: argocd
+    repoURL: https://github.com/tony24681379/test-gitops.git
+    targetRevision: main
+  syncPolicy:
+    syncOptions:
+    - ApplyOutOfSyncOnly=true
+    - CreateNamespace=true
