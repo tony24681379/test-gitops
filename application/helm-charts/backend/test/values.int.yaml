@@ -52,7 +52,7 @@ redis:
   enabled: false
 
 configMapValues:
-  AWS_ACCOUNT: 123
+  AWS_ACCOUNT: "123"
   AWS_REGION: ap-southeast-2
   DB_HOST: test
   DB_NAME: test
