@@ -48,7 +48,7 @@ serviceAccount:
   roleArn: arn:aws:iam::396430457061:role/vicone-dc3-xzeta-int-bff-api-py
 
 postgresql:
-  enabled: false
+  enabled: true
 
 redis:
   enabled: false
