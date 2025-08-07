@@ -1,0 +1,64 @@
+type: backend
+name: test
+image: nginx
+
+versions:
+  latest:
+    imageTag: 1.29.0-alpine
+    migration:
+      enabled: false
+    apps:
+      1:
+        name: app
+        replicas: 1
+        capacityType: spot
+        ipLocalPortRange: true
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        hpa:
+          enabled: false
+      worker:
+        name: worker
+        replicas: 1
+        capacityType: spot
+        ipLocalPortRange: false
+        networkDisable: true
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        hpa:
+          enabled: true
+          minReplicas: 1
+          maxReplicas: 3
+          cupUtilization: 60
+    # end for CI checking
+    end:
+
+serviceAccount:
+  enabled: true
+  roleArn: arn:aws:iam::396430457061:role/vicone-dc3-xzeta-int-bff-api-py
+
+postgresql:
+  enabled: false
+
+redis:
+  enabled: false
+
+configMapValues:
+  AWS_ACCOUNT: 123
+  AWS_REGION: ap-southeast-2
+  DB_HOST: test
+  DB_NAME: test
+  DB_USERNAME: test
+
+secretValues:
+  DB_PASSWORD: test

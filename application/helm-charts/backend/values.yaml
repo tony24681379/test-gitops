@@ -1,0 +1,100 @@
+pr:
+  enabled: false
+type: backend
+name:
+image:
+
+# versions:
+  # latest:
+  #   imageTag:
+  #   migration:
+  #     enabled: false
+  #   apps:
+  #     1:
+  #       name: socket
+  #       replicas: 1
+  #       ipLocalPortRange: false
+  #       networkDisable:
+  #       uri:
+  #       resources:
+  #         limits:
+  #           cpu: 1000m
+  #           memory: 500Mi
+  #         requests:
+  #           cpu: 100m
+  #           memory: 100Mi
+  #       hpa:
+  #         enabled: false
+  #         minReplicas: 2
+  #         maxReplicas: 10
+  #         cupUtilization: 80
+  #       destinationRule:
+  #         enabled: false
+        #   subsets:
+        #     students:
+        #       match:
+        #         headers:
+        #           role:
+        #             exact: student
+        #       trafficPolicy:
+        #         loadBalancer:
+        #           consistentHash:
+        #             httpHeaderName: lesson-id
+    # end for CI checking
+    # end:
+    # jobs:
+      # 1:
+      #   name: create-sqs-queue
+      #   annotations:
+      #     argocd.argoproj.io/hook: PreSync
+      #     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+      #   image: public.ecr.aws/aws-cli/aws-cli
+      #   command:
+      #   - sh
+      #   - -c
+      #   - |
+      #     aws sqs create-queue --queue-name $SQS_LESSON_SUMMARY && \
+      #     aws sqs create-queue --queue-name $SQS_LMS
+      # 2:
+      #   name: delete-sqs-queue
+      #   annotations:
+      #     argocd.argoproj.io/hook: PostDelete
+      #     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+      #   image: public.ecr.aws/aws-cli/aws-cli
+      #   command:
+      #   - sh
+      #   - -c
+      #   - |
+      #     aws sqs delete-queue --queue-url https://$AWS_REGION.amazonaws.com/$AWS_ACCOUNT/$SQS_LESSON_SUMMARY && \
+      #     aws sqs delete-queue --queue-url https://$AWS_REGION.amazonaws.com/$AWS_ACCOUNT/$SQS_LMS
+
+serviceAccount:
+  enabled: false
+  roleArn:
+
+postgresql:
+  enabled: false
+  primary:
+    persistence:
+      enabled: false
+  auth:
+    username: postgres
+    password: postgres
+    postgresPassword: postgres
+    database: postgres
+
+redis:
+  enabled: false
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+
+dropLog: false
+jsonLog: true
+
+configMapValues:
+
+secretValues:

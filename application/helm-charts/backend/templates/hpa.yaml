@@ -1,0 +1,53 @@
+{{- range $version, $values := .Values.versions }}
+{{- range $values.apps }}
+{{ if .hpa.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: "{{ $.Values.name }}-{{ $version }}-{{ .name }}"
+  labels:
+    app.kubernetes.io/type: {{ $.Values.type }}
+    app.kubernetes.io/name: {{ .name }}
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: "{{ $.Values.name }}-{{ $version }}-{{ .name }}"
+    apiVersion: apps/v1
+  minReplicas: {{ .hpa.minReplicas }}
+  maxReplicas: {{ .hpa.maxReplicas }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .hpa.cupUtilization }}
+    {{- if .hpa.memoryUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .hpa.memoryUtilization }}
+    {{- end }}
+{{ end }}
+{{ end }}
+{{ end }}

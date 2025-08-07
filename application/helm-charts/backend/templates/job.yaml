@@ -1,0 +1,46 @@
+{{- range $version, $values := .Values.versions }}
+{{- range $values.jobs }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ $.Values.name }}-{{ $version }}-{{ .name }}"
+  annotations:
+  {{- with .annotations }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "false"
+        {{- if $.Values.dropLog }}
+        vector.dev/exclude: "true"
+        {{- end }}
+    spec:
+      {{- if $.Values.serviceAccount.enabled }}
+      serviceAccount: {{ $.Values.name }}
+      serviceAccountName: {{ $.Values.name }}
+      {{- end }}
+      restartPolicy: Never
+      containers:
+      - name: {{ .name }}
+        image: {{ if .image }}{{ .image }}{{ else }}"{{ $.Values.image }}:{{ $values.imageTag }}"{{ end }}
+        imagePullPolicy: IfNotPresent
+        command:
+        {{- with .command }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        env:
+        {{- with .env }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .envFrom }}
+        envFrom:
+          - configMapRef:
+              name: {{ $.Values.name }}
+          - secretRef:
+              name: {{ $.Values.name }}
+        {{- end }}
+{{ end }}
+{{ end }}

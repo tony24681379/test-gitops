@@ -1,0 +1,98 @@
+pr:
+  enabled: true
+type: backend
+name: __NAME__
+image: nginx
+
+versions:
+  latest:
+    imageTag: __IMAGE__
+    migration:
+      enabled: false
+    apps:
+      1:
+        name: app
+        replicas: 1
+        capacityType: spot
+        ipLocalPortRange: true
+        resources:
+          limits:
+            cpu: 100m
+            memory: 1000Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        hpa:
+          enabled: false
+      worker:
+        name: worker
+        replicas: 1
+        capacityType: spot
+        ipLocalPortRange: false
+        networkDisable: true
+        resources:
+          limits:
+            cpu: 100m
+            memory: 1000Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        hpa:
+          enabled: false
+    # end for CI checking
+    end:
+    jobs:
+      1:
+        name: create-sqs-queue
+        annotations:
+          argocd.argoproj.io/hook: Sync
+          argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+        image: public.ecr.aws/aws-cli/aws-cli
+        envFrom: true
+        command:
+        - sh
+        - -c
+        - |
+          # First create the DLQ with 14 days retention
+          aws sqs create-queue \
+            --queue-name $SQS_DLQ_VSA_EVENT \
+      2:
+        name: delete-sqs-queue
+        annotations:
+          argocd.argoproj.io/hook: PostDelete
+          argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+        image: public.ecr.aws/aws-cli/aws-cli
+        env:
+        - name: AWS_REGION
+          value: {{ ssm "/infra/region" }}
+        - name: AWS_ACCOUNT
+          value: "{{ ssm "/infra/account" }}"
+        command:
+        - sh
+        - -c
+        - |
+          aws sqs delete-queue --queue-url https://$AWS_REGION.amazonaws.com/$AWS_ACCOUNT/$SQS_NAME
+
+dropLog: true
+jsonLog: true
+
+serviceAccount:
+  enabled: true
+  roleArn: arn:aws:iam::396430457061:role/vicone-dc3-xzeta-int-bff-api-py
+
+postgresql:
+  enabled: false
+
+redis:
+  enabled: false
+
+configMapValues:
+  AWS_ACCOUNT: "{{ ssm "/infra/account" }}"
+  AWS_REGION: {{ ssm "/infra/region" }}
+  DB_HOST: {{ ssm "/app/xzeta/test/DB_HOST" }}
+  DB_NAME: {{ ssm "/app/xzeta/test/DB_NAME" }}
+  DB_USERNAME: {{ ssm "/app/xzeta/test/DB_USERNAME" }}
+  SQS_NAME: {{ ssm "/app/xzeta/test/SQS_NAME" }}
+
+secretValues:
+  DB_PASSWORD: {{ ssm "/app/xzeta/test/DB_PASSWORD" }}

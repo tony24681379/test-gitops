@@ -1,0 +1,23 @@
+{{- range $version, $values := .Values.versions }}
+{{- range $values.apps }}
+{{- if not .networkDisable }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $.Values.name }}-{{ $version }}-{{ .name }}"
+  labels:
+    app.kubernetes.io/type: {{ $.Values.type }}
+    app.kubernetes.io/name: "{{ $.Values.name }}-{{ $version }}-{{ .name }}"
+spec:
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/type: {{ $.Values.type }}
+    app.kubernetes.io/name: "{{ $.Values.name }}-{{ $version }}-{{ .name }}"
+{{- end }}
+{{- end }}
+{{- end }}
