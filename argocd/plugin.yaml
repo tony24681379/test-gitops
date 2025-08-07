@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ConfigManagementPlugin
+metadata:
+  name: helm-ssm
+spec:
+  version: v1.0
+  generate:
+    command: 
+      - sh
+      - /var/run/argocd/helm-plugin/generate.sh
+  discover:
+    find:
+      command:
+        - sh
+        - "-c"
+        - "find . -name 'values*.yaml'"
+  init:
+    command:
+      - sh
+      - "-c"
+      - |
+        if [ -f Chart.yaml ]; then
+          if grep -q "dependencies" Chart.yaml; then
+            helm ssm -f values.yaml
+            helm dependency build
+          fi
+        fi
+  parameters:
+    static:
+      - name: values-files
+        title: value files
+        collectionType: array
+      - name: string
+        title: parameter
+        collectionType: string
+    dynamic:
+      command: 
+        - sh
+        - "-c"
+        - /var/run/argocd/helm-plugin/get-parameters.sh

@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+spec:
+  template:
+    spec:
+      volumes:
+        - configMap:
+            name: helm-plugin-config
+          name: helm-plugin-config
+        - name: helm-plugin-tmp
+          emptyDir: {}
+        - name: helm-plugin-tools
+          emptyDir: {}
+
+      # Download tools
+      initContainers:
+      - name: download-tools
+        image: alpine/curl
+        command:
+          - sh
+          - -c
+          - |
+            wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.6.0/kustomize_v5.6.0_linux_arm64.tar.gz -O - | tar xz && mv kustomize /tools/kustomize
+            wget https://get.helm.sh/helm-v3.17.0-linux-arm64.tar.gz -O - | tar xz && mv linux-arm64/helm /tools/helm && chmod +x /tools/helm
+            wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-arm64 -O /tools/jq && chmod +x /tools/jq
+            wget https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_arm64 -O /tools/yq && chmod +x /tools/yq
+            wget https://github.com/codacy/helm-ssm/releases/download/3.3.3/helm-ssm-linux-arm.tgz && mkdir -p /tools/helm-ssm && tar zxvf helm-ssm-linux-arm.tgz -C /tools/helm-ssm
+
+        volumeMounts:
+          - mountPath: /tools
+            name: helm-plugin-tools
+
+      containers:
+      - name: argocd-repo-server
+        env:
+          - name: HELM_PLUGINS
+            value: /home/argocd/.local/share/helm/plugins/
+        volumeMounts:
+          - mountPath: /home/argocd/.local/share/helm/plugins/helm-ssm
+            subPath: helm-ssm
+            name: helm-plugin-tools
+          - mountPath: /usr/local/bin/yq
+            subPath: yq
+            name: helm-plugin-tools
+          - mountPath: /usr/local/bin/jq
+            subPath: jq
+            name: helm-plugin-tools
+      - name: helm-ssm
+        command: [/var/run/argocd/argocd-cmp-server]
+        image: quay.io/argoproj/argocd:v3.0.0
+        # args: ["--loglevel=debug"]
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 999
+        env:
+          - name: HELM_PLUGINS
+            value: /home/argocd/.local/share/helm/plugins/
+        volumeMounts:
+          - mountPath: /var/run/argocd
+            name: var-files
+          - mountPath: /home/argocd/cmp-server/plugins
+            name: plugins
+          - mountPath: /helm-working-dir
+            name: helm-plugin-tmp
+          - mountPath: /home/argocd/cmp-server/config/plugin.yaml
+            subPath: plugin.yaml
+            name: helm-plugin-config
+          - mountPath: /var/run/argocd/helm-plugin/generate.sh
+            subPath: generate.sh
+            name: helm-plugin-config
+          - mountPath: /var/run/argocd/helm-plugin/get-parameters.sh
+            subPath: get-parameters.sh
+            name: helm-plugin-config
+          - mountPath: /usr/local/bin
+            name: helm-plugin-tools
+          - mountPath: /home/argocd/.local/share/helm/plugins/helm-ssm
+            subPath: helm-ssm
+            name: helm-plugin-tools
+          - mountPath: /usr/local/bin/helm
+            subPath: helm
+            name: helm-plugin-tools
+          - mountPath: /usr/local/bin/kustomize
+            subPath: kustomize
+            name: helm-plugin-tools
+          - mountPath: /tmp
+            name: tmp
