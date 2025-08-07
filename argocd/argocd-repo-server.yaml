@@ -22,11 +22,11 @@ spec:
           - sh
           - -c
           - |
-            wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.6.0/kustomize_v5.6.0_linux_arm64.tar.gz -O - | tar xz && mv kustomize /tools/kustomize
-            wget https://get.helm.sh/helm-v3.17.0-linux-arm64.tar.gz -O - | tar xz && mv linux-arm64/helm /tools/helm && chmod +x /tools/helm
-            wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-arm64 -O /tools/jq && chmod +x /tools/jq
-            wget https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_arm64 -O /tools/yq && chmod +x /tools/yq
-            wget https://github.com/codacy/helm-ssm/releases/download/3.3.3/helm-ssm-linux-arm.tgz && mkdir -p /tools/helm-ssm && tar zxvf helm-ssm-linux-arm.tgz -C /tools/helm-ssm
+            wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.7.1/kustomize_v5.7.1_linux_amd64.tar.gz -O - | tar xz && mv kustomize /tools/kustomize
+            wget https://get.helm.sh/helm-v3.17.4-linux-amd64.tar.gz -O - | tar xz && mv linux-amd64/helm /tools/helm && chmod +x /tools/helm
+            wget https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-amd64 -O /tools/jq && chmod +x /tools/jq
+            wget https://github.com/mikefarah/yq/releases/download/v4.47.1/yq_linux_amd64 -O /tools/yq && chmod +x /tools/yq
+            wget https://github.com/codacy/helm-ssm/releases/download/3.3.3/helm-ssm-linux.tgz && mkdir -p /tools/helm-ssm && tar zxvf helm-ssm-linux.tgz -C /tools/helm-ssm
 
         volumeMounts:
           - mountPath: /tools
