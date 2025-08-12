@@ -43,7 +43,7 @@ versions:
 
 serviceAccount:
   enabled: true
-  roleArn: arn:aws:iam::396430457061:role/vicone-dc3-xzeta-int-bff-api-py
+  roleArn: arn:aws:iam::396430457061:role/argocd
 
 postgresql:
   enabled: false
@@ -57,7 +57,7 @@ configMapValues:
   DB_HOST: ref+awsssm://vicone-dc3-phi-stg/bin-mag/db_hostname
   DB_NAME: test
   DB_USERNAME: test
-  AUTH: ref+awssecrets:/xzeta/dc3/int/api-auth
+  AUTH: ref+awssecrets://xzeta/dc3/int/api-auth
 
 secretValues:
   DB_PASSWORD: test
