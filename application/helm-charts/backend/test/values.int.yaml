@@ -54,9 +54,10 @@ redis:
 configMapValues:
   AWS_ACCOUNT: "123"
   AWS_REGION: ap-southeast-2
-  DB_HOST: test
+  DB_HOST: ref+awsssm://vicone-dc3-phi-stg/bin-mag/db_hostname
   DB_NAME: test
   DB_USERNAME: test
+  AUTH: ref+awssecrets:/xzeta/dc3/int/api-auth
 
 secretValues:
   DB_PASSWORD: test
